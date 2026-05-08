@@ -5,14 +5,11 @@ WORKDIR /app
 # Add build tools
 RUN apk add --no-cache python3 make g++
 
-RUN corepack enable
-RUN corepack prepare pnpm@latest --activate
-
-COPY package.json pnpm-lock.yaml ./
-RUN pnpm install --frozen-lockfile
+COPY package*.json ./
+RUN npm install
 
 COPY . .
-RUN pnpm build
+RUN npm run build
 
 # Production stage
 FROM node:22-alpine AS production
@@ -22,10 +19,10 @@ RUN apk add --no-cache dumb-init \
     && addgroup -g 1001 -S nodejs \
     && adduser -S nestjs -u 1001
 
-RUN corepack enable
-RUN corepack prepare pnpm@latest --activate
+COPY package*.json ./
+RUN npm install --omit=dev \
+    && npm cache clean --force
 
-COPY --from=builder --chown=nestjs:nodejs /app/node_modules ./node_modules
 COPY --from=builder --chown=nestjs:nodejs /app/dist ./dist
 
 USER nestjs
