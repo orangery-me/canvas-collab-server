@@ -1,0 +1,9 @@
+version: "3.8"
+
+services:
+  canvas-collab-server:
+    image: orangery/canvas-collab-server:latest
+    container_name: ${APP_NAME:-canvas-collab}-server
+    restart: unless-stopped
+    env_file:
+      - .env
